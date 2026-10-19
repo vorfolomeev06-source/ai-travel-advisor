@@ -45,11 +45,13 @@ def send_message(data: Message):
             "history": history
         }
     except OpenAIError as error:
-        print(f"OPENAI ERROR: {type(error).__name__}: {error}", flush=True)
-    raise HTTPException(
+        print(f"OPENAI ERROR: {repr(error)}", flush=True)
+        print(f"ROOT CAUSE: {repr(error.__cause__)}", flush=True)
+        raise HTTPException(
         status_code=502,
         detail="AI service temporarily unavailable"
     )
+    
 
 @app.get("/")
 def homepage():
