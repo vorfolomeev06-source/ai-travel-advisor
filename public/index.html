@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Travel Advisor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #071426;
+      color: white;
+      margin: 0;
+      padding: 30px;
+    }
+    main {
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 { color: #38bdf8; }
+    #messages {
+      background: #11243d;
+      padding: 20px;
+      border-radius: 12px;
+      height: 450px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .message {
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      background: #1e3553;
+    }
+    .user { background: #155e75; }
+    form { display: flex; gap: 10px; margin-top: 15px; }
+    input {
+      flex: 1;
+      padding: 14px;
+      border-radius: 8px;
+      border: none;
+      min-width: 0;
+    }
+    button {
+      background: #38bdf8;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>✈ AI Travel Advisor</h1>
+    <p>Plan your next adventure with AI.</p>
+
+    <div id="messages"></div>
+
+    <form id="form">
+      <input id="message" placeholder="Where do you want to go?" required>
+      <button id="send" type="submit">Send</button>
+    </form>
+  </main>
+
+  <script>
+    let history = [];
+
+    const form = document.getElementById("form");
+    const input = document.getElementById("message");
+    const messages = document.getElementById("messages");
+    const button = document.getElementById("send");
+
+    function addMessage(sender, text, className = "") {
+      const div = document.createElement("div");
+      div.className = "message " + className;
+      div.textContent = sender + ": " + text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage("You", message, "user");
+      input.value = "";
+      button.disabled = true;
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message, history })
+        });
+
+        if (!response.ok) throw new Error("Request failed");
+
+        const data = await response.json();
+
+        history = data.history;
+        addMessage("Advisor", data.answer);
+
+      } catch (error) {
+        addMessage("System", "Something went wrong. Try again.");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
