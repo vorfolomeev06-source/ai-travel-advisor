@@ -44,13 +44,12 @@ def send_message(data: Message):
             "answer": answer,
             "history": history
         }
-
-    except OpenAIError:
-        raise HTTPException(
-            status_code=502,
-            detail="AI service temporarily unavailable"
-        )
-from fastapi.responses import FileResponse
+    except OpenAIError as error:
+        print(f"OPENAI ERROR: {type(error).__name__}: {error}", flush=True)
+    raise HTTPException(
+        status_code=502,
+        detail="AI service temporarily unavailable"
+    )
 
 @app.get("/")
 def homepage():
